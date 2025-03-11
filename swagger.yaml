@@ -4,7 +4,7 @@ info:
   description: API documentation for the WP Gifty WooCommerce plugin.
   version: 1.0.0
 servers:
-  - url: https://yourstore.com/wp-json/wp-gifty/v1
+  - url: https://wp.tasks.autos/wp-json
     description: Production Server
 
 paths:
