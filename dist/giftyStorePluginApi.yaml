@@ -1,0 +1,199 @@
+openapi: 3.0.0
+info:
+  title: WP Gifty API
+  description: API documentation for the WP Gifty WooCommerce plugin.
+  version: 1.0.0
+servers:
+  - url: https://yourstore.com/wp-json/wp-gifty/v1
+    description: Production Server
+
+paths:
+  /products:
+    get:
+      summary: Get paginated products
+      operationId: getProducts
+      tags:
+        - Products
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Page number for pagination.
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Number of products per page.
+      responses:
+        "200":
+          description: A list of products.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+        "400":
+          description: Bad request.
+        "404":
+          description: No products found.
+
+  /products/{id}:
+    get:
+      summary: Get product details by ID
+      operationId: getProduct
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Product ID.
+      responses:
+        "200":
+          description: Product details including variations and attributes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found.
+
+  /products/check-availability:
+    post:
+      summary: Check if a product variation is in stock
+      operationId: checkAvailability
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+                  description: The parent product ID.
+                attributes:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Attributes for the selected variation (e.g., size, color).
+      responses:
+        "200":
+          description: Stock status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  in_stock:
+                    type: boolean
+                    description: Whether the variation is in stock.
+                  stock_quantity:
+                    type: integer
+                    description: Available stock quantity.
+        "400":
+          description: Invalid request.
+        "404":
+          description: Product or variation not found.
+
+  /categories:
+    get:
+      summary: Get all product categories
+      operationId: getCategories
+      tags:
+        - Categories
+      responses:
+        "200":
+          description: List of categories.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /brands:
+    get:
+      summary: Get all product brands
+      operationId: getBrands
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: List of brands.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Brand"
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+        image:
+          type: string
+        variations:
+          type: array
+          items:
+            type: object
+            properties:
+              variation_id:
+                type: integer
+              attributes:
+                type: object
+                additionalProperties:
+                  type: string
+              price:
+                type: number
+              in_stock:
+                type: boolean
+              stock_quantity:
+                type: integer
+        attributes:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              values:
+                type: array
+                items:
+                  type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        parent_id:
+          type: integer
+          description: Parent category ID if it's a subcategory.
+
+    Brand:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
